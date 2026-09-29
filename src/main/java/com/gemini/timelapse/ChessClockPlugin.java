@@ -22,15 +22,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
+
+import java.util.Iterator;
 
 public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExecutor {
 
@@ -47,12 +51,14 @@ public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExe
     private int activeTurn = 0; 
     private BukkitRunnable clockTask;
     private final MiniMessage mm = MiniMessage.miniMessage();
+    private NamespacedKey arenaToolKey;
 
     @Override
     public void onEnable() {
+        arenaToolKey = new NamespacedKey(this, "arena_tool");
         getServer().getPluginManager().registerEvents(this, this);
         getCommand("chessclock").setExecutor(this);
-        getLogger().info("ChessClock loaded. Foam-noodle weapons equipped.");
+        getLogger().info("ChessClock loaded. Foam-noodle weapons equipped, death mechanics updated.");
     }
 
     @Override
@@ -167,13 +173,13 @@ public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExe
             meta.addEnchant(Enchantment.EFFICIENCY, 3, true);
             meta.addEnchant(Enchantment.FORTUNE, 3, true);
 
-            // Create keys for our custom attribute modifiers
+            // Tag the item secretly so we can find it when the player dies
+            meta.getPersistentDataContainer().set(arenaToolKey, PersistentDataType.BYTE, (byte) 1);
+
             NamespacedKey damageKey = new NamespacedKey(this, material.name().toLowerCase() + "_dmg");
             NamespacedKey speedKey = new NamespacedKey(this, material.name().toLowerCase() + "_spd");
 
-            // Adding 0 bonus damage leaves the player with their base fist damage of 1.
             AttributeModifier damageMod = new AttributeModifier(damageKey, 0.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
-            // Adding 100 to attack speed entirely removes the swing cooldown.
             AttributeModifier speedMod = new AttributeModifier(speedKey, 100.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlotGroup.MAINHAND);
 
             meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, damageMod);
@@ -219,6 +225,24 @@ public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExe
         int seconds = timeRemaining % 60;
         String timeStr = String.format("%02d:%02d", minutes, seconds);
         display.text(mm.deserialize("<" + color + "><b>" + timeStr + "</b></" + color + ">")); 
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        if (!gameActive) return;
+
+        // Iterate through the items the player is about to drop
+        Iterator<ItemStack> iterator = event.getDrops().iterator();
+        while (iterator.hasNext()) {
+            ItemStack drop = iterator.next();
+            if (drop != null && drop.hasItemMeta()) {
+                // If it has our secret arena_tool tag, remove it from the floor drops and give it back to the player on respawn
+                if (drop.getItemMeta().getPersistentDataContainer().has(arenaToolKey, PersistentDataType.BYTE)) {
+                    iterator.remove();
+                    event.getItemsToKeep().add(drop);
+                }
+            }
+        }
     }
 
     @EventHandler
