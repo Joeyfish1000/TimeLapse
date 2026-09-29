@@ -1,4 +1,12 @@
-name: TimeLapse
+name: ChessClock
+version: '${project.version}'
+main: com.yourname.chessclock.ChessClockPlugin
+api-version: '1.21'
+commands:
+  chessclock:
+    description: Master control for the temporal arena.
+    permission: chessclock.admin
+    usage: /chessclock <set1|set2|start|stop>name: TimeLapse
 version: '${project.version}'
 main: com.gemini.timelapse.TimeLapsePlugin
 api-version: '1.21'
