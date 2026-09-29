@@ -1,4 +1,4 @@
-package com.yourname.chessclock;
+package com.gemini.timelapse;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -47,7 +47,7 @@ public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExe
 
     @Override
     public void onDisable() {
-        stopGame(); // Clean up floating text entities if the server restarts
+        stopGame(); 
     }
 
     @Override
@@ -91,7 +91,7 @@ public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExe
     }
 
     private void startGame() {
-        stopGame(); // Clean up existing game state
+        stopGame(); 
         
         player1Time = 300;
         player2Time = 300;
@@ -120,7 +120,7 @@ public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExe
                 }
             }
         };
-        clockTask.runTaskTimer(this, 20L, 20L); // Run every 1 second
+        clockTask.runTaskTimer(this, 20L, 20L); 
     }
 
     private void stopGame() {
@@ -133,7 +133,6 @@ public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExe
     private void endGame(int loser) {
         stopGame();
         getServer().broadcast(mm.deserialize("<gold><b>Player " + loser + "'s clock hit zero. Game Over.</b></gold>"));
-        // In a full version, you would strike lightning on the specific UUID here.
     }
 
     private TextDisplay spawnDisplay(Location loc, String initialText) {
@@ -159,10 +158,8 @@ public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExe
         if (clicked == null) return;
 
         if (clicked.getLocation().equals(button1Loc)) {
-            // Player 1 pressed their button. Stop their time, start Player 2.
             activeTurn = 2;
         } else if (clicked.getLocation().equals(button2Loc)) {
-            // Player 2 pressed their button. Stop their time, start Player 1.
             activeTurn = 1;
         }
     }
@@ -174,14 +171,12 @@ public class ChessClockPlugin extends JavaPlugin implements Listener, CommandExe
 
         Block broken = event.getBlock();
         
-        // Protect the buttons themselves
         if (broken.getLocation().equals(button1Loc) || broken.getLocation().equals(button2Loc)) {
             event.setCancelled(true);
             return;
         }
 
-        // Protect the blocks the buttons are attached to
-        Block attachedTo1 = button1Loc.getBlock().getRelative(BlockFace.DOWN); // Assuming floor buttons for prototype
+        Block attachedTo1 = button1Loc.getBlock().getRelative(BlockFace.DOWN); 
         Block attachedTo2 = button2Loc.getBlock().getRelative(BlockFace.DOWN);
 
         if (broken.getLocation().equals(attachedTo1.getLocation()) || broken.getLocation().equals(attachedTo2.getLocation())) {
