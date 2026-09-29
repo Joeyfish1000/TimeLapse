@@ -6,4 +6,4 @@ commands:
   chessclock:
     description: Master control for the temporal arena.
     permission: chessclock.admin
-    usage: "/chessclock <set1|set2|start|stop>"
+    usage: "/chessclock <set1|set2|time|start|stop>"
