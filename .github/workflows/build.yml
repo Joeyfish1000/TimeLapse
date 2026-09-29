@@ -1,4 +1,4 @@
-name: Build TimeLapse Plugin
+name: Build ChessClock Plugin
 on: [push, pull_request]
 
 jobs:
@@ -19,5 +19,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: timelapse-plugin
-          path: target/TimeLapse-1.0-SNAPSHOT.jar
+          name: chessclock-plugin
+          path: target/ChessClock-1.0-SNAPSHOT.jar
