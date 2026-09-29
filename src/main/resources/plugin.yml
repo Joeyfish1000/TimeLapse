@@ -1,0 +1,8 @@
+name: TimeLapse
+version: '${project.version}'
+main: com.gemini.timelapse.TimeLapsePlugin
+api-version: '1.21'
+commands:
+  timelapse:
+    description: Timelapse.
+    permission: timelapse.admin
